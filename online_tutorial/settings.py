@@ -53,7 +53,7 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES' : (
-            'users.authentication.UserAuthentication'
+            'users.authentication.UserTokenAuthentication'
         )
 }
 

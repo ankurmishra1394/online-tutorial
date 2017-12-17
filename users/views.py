@@ -4,7 +4,7 @@ from rest_framework import mixins, viewsets
 from users.models import User
 from rest_framework.views import APIView
 from serializers import UserSerializer
-from users.authentication import IsUserAuthicated, UserAuthentication
+from users.authentication import IsUserAuthicated, UserTokenAuthentication
 from rest_framework.response import Response
 
 class UserMixin(object):
@@ -23,7 +23,7 @@ class UserViewSet(UserMixin,
 
 class AuthViewSet(APIView):
 	queryset = User.objects.all()
-	authentication_classes = (UserAuthentication, )
+	authentication_classes = (UserTokenAuthentication, )
 
 	def post(self, request, format=None):
 		content = {

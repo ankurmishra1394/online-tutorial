@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.contrib.auth.hashers import (
 	check_password, is_password_usable, make_password,
 )
+from datetime import datetime, timedelta
 
 class AbstractUUIDBaseClass(models.Model):
 	id = models.UUIDField(_('id'), primary_key=True, default=uuid.uuid4, editable=False)
@@ -87,6 +88,7 @@ class User(AbstractBaseUser):
 	def __str__(self):
 		return self.username
 
+	@property
 	def transform(self):
 		return {
 			'id' : self.id,
@@ -106,4 +108,25 @@ class User(AbstractBaseUser):
 		if not user[0].is_active:
 			raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
 
-		return user[0].transform()
+		return user[0].transform
+
+class UserToken(AbstractUUIDBaseClass):
+	access_token = models.CharField(max_length=255, default=uuid.uuid4)
+	user = models.ForeignKey('User', on_delete=models.CASCADE)
+	expires_at = models.DateTimeField(_('expire datetime'), default=datetime.now()+timedelta(days=2))
+	created_at = models.DateTimeField(_('created datetime'), default=timezone.now)
+
+	class Meta:
+		db_table = 'user_token'
+
+	def __str__(self):
+		return self.user.username
+
+	@property
+	def transform(self):
+		return {
+			'id' : self.id,
+			'token' : self.access_token,
+			'user' : self.user.transform,
+			'createdAt' : self.created_at
+		}

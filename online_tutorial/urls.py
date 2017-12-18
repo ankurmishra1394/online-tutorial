@@ -21,10 +21,10 @@ from users.views import (
 )
 
 route = routers.DefaultRouter()
-# route.register('auth', AuthViewSet)
+route.register('auth', AuthViewSet)
 route.register('user', UserViewSet)
 
 urlpatterns = [
-    url(r'^auth/login$', AuthViewSet.as_view()),
+    # url(r'^auth/login$', AuthViewSet.as_view()),
     url(r'^', include(route.urls))
 ]

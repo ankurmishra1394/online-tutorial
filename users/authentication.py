@@ -10,8 +10,8 @@ class IsUserAuthicated(authentication.BaseAuthentication):
 			raise exceptions.AuthenticationFailed(_('UNAUTHORISED ACCESS! NO HEADER PROVIDED'))
 		try:
 			user_token = UserToken.objects.get(access_token=token)
-		except User.DoesNotExist:
-			raise exceptions.AuthenticationFailed('Unauthorised User')
+		except Exception:
+			raise exceptions.AuthenticationFailed(_('Invalid token provided'))
 			
 		return (user_token.user.transform, user_token.transform)
 
@@ -21,7 +21,8 @@ class UserTokenAuthentication(authentication.BaseAuthentication):
 		password = request.data.get('password', None)
 
 		if not username or not password:
-			raise exceptions.AuthenticationFailed(_('No credentials provided.'))
+			return ('Anonymous User', None)
+			# raise exceptions.AuthenticationFailed(_('No credentials provided.'))
 
 		credentials = {
 			'username':username,

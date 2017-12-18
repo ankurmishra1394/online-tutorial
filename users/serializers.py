@@ -3,7 +3,7 @@ from users.models import User
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
 	id = serializers.ReadOnlyField()
-	password = serializers.CharField(write_only=True)
+	password = serializers.CharField(write_only=True, style={'input_type':'password'})
 
 	class Meta:
 		model = User
@@ -15,3 +15,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 		user.set_reset_code()
 		user.save()
 		return user
+

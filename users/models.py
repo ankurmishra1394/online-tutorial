@@ -58,6 +58,12 @@ class AbstractBaseUser(AbstractUUIDBaseClass):
 		verbose_name = _('user')
 		verbose_name_plural = _('users')
 
+	def __init__(self, *args, **kwargs):
+		super(AbstractBaseUser, self).__init__(*args, **kwargs)
+		# Stores the raw password if set_password() is called so that it can
+		# be passed to password_changed() after the model is saved.
+		self._password = None
+
 	def get_full_name(self):
 		'''
 		Return first_name plus middle_name plus last_name with space in between
@@ -73,9 +79,22 @@ class AbstractBaseUser(AbstractUUIDBaseClass):
 
 	def set_password(self, raw_password):
 		self.password = make_password(raw_password)
+		self._password = raw_password
 
 	def set_reset_code(self):
 		self.reset_code = str(uuid.uuid4())
+
+	def check_password(self, raw_password):
+		"""
+		Return a boolean of whether the raw_password was correct. Handles
+		hashing formats behind the scenes.
+		"""
+		def setter(raw_password):
+			self.set_password(raw_password)
+			# Password hash upgrades shouldn't be considered password changes.
+			self._password = None
+			self.save(update_fields=["password"])
+		return check_password(raw_password, self.password, setter)
 
 class User(AbstractBaseUser):
 	reset_code = models.CharField(_('reset code'), max_length=255)
@@ -103,12 +122,16 @@ class User(AbstractBaseUser):
 	def authenticate(credentials):
 		user = User.objects.filter(**{'username':credentials['username']})
 		if not len(user):
-			raise exceptions.AuthenticationFailed(_('Invalid username/password.'))
+			raise exceptions.AuthenticationFailed(_('Please register your username first.'))
 
 		if not user[0].is_active:
 			raise exceptions.AuthenticationFailed(_('User inactive or deleted.'))
 
+		if not user[0].check_password(credentials['password']):
+			raise exceptions.AuthenticationFailed(_('Invalid username/passowrd combination'))
+
 		return user[0].transform
+
 
 class UserToken(AbstractUUIDBaseClass):
 	access_token = models.CharField(max_length=255, default=uuid.uuid4)

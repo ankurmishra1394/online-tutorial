@@ -42,4 +42,4 @@ class AuthViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, viewsets.G
 			'user': request.user,
 			'auth': request.auth,
 		}
-		return Response(content)
+		return Response(content, status=status.HTTP_200_OK)

@@ -12,7 +12,10 @@ class IsUserAuthicated(authentication.BaseAuthentication):
 			user_token = UserToken.objects.get(access_token=token)
 		except Exception:
 			raise exceptions.AuthenticationFailed(_('Invalid token provided'))
-			
+
+		if not user_token.user.is_active:
+			raise exceptions.AuthenticationFailed(_('Account not activated or deleted!'))
+
 		return (user_token.user.transform, user_token.transform)
 
 class UserTokenAuthentication(authentication.BaseAuthentication):
@@ -33,3 +36,4 @@ class UserTokenAuthentication(authentication.BaseAuthentication):
 		auth = UserToken.objects.create(**{'user_id':user['id']}).transform
 
 		return (user, auth)
+		

@@ -2,6 +2,7 @@ from rest_framework import authentication
 from rest_framework import exceptions
 from users.models import User, UserToken
 from django.utils.translation import ugettext_lazy as _
+from rest_framework.parsers import JSONParser
 
 class IsUserAuthicated(authentication.BaseAuthentication):
 	def authenticate(self, request):
@@ -20,8 +21,9 @@ class IsUserAuthicated(authentication.BaseAuthentication):
 
 class UserTokenAuthentication(authentication.BaseAuthentication):
 	def authenticate(self, request):
-		username = request.data.get('username', None)
-		password = request.data.get('password', None)
+		data = JSONParser().parse(request)
+		username = data['username']
+		password = data['password']
 
 		if not username or not password:
 			return ('Anonymous User', None)

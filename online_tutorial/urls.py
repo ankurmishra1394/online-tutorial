@@ -17,14 +17,19 @@ from django.conf.urls import url, include
 # from django.contrib import admin
 from rest_framework import routers
 from users.views import (
-	UserViewSet, AuthViewSet
+	UserViewSet, AuthViewSet, user_signin, user_signup, account_activate
 )
 
 route = routers.DefaultRouter()
-route.register('auth', AuthViewSet)
+# route.register('auth', AuthViewSet)
 route.register('user', UserViewSet)
 
 urlpatterns = [
-    # url(r'^auth/login$', AuthViewSet.as_view()),
-    url(r'^', include(route.urls))
+    # Authentication & Registration URLS
+    url(r'^auth/login$', user_signin),
+    url(r'^auth/signup$', user_signup),
+    url(r'^auth/account/activate', account_activate),
+    
+    # Including Default URLS
+    url(r'^', include(route.urls)),
 ]
